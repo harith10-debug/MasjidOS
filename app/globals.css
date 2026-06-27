@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ *
+ *  Global base layer
+ *  CRO note: a fast, jank-free first paint is the single biggest
+ *  conversion lever. We keep global CSS tiny and let Tailwind do work.
+ * ------------------------------------------------------------------ */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-midnight-950 text-white/90 font-sans antialiased;
+    /* Prevent horizontal scroll caused by 3D-rotated device mockups. */
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    @apply bg-gold-500/30 text-white;
+  }
+}
+
+@layer components {
+  /* Reusable gold-on-dark gradient text for headlines. */
+  .text-gradient-gold {
+    @apply bg-gradient-to-br from-white via-gold-400 to-gold-600 bg-clip-text text-transparent;
+  }
+
+  /* Glassmorphism surface used across cards, navbar, mockups. */
+  .glass {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+  }
+
+  /* Subtle Islamic arabesque pattern, kept very low opacity per the
+     design system ("very faint, low-opacity arabesque patterns"). */
+  .arabesque {
+    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23e6bd55' stroke-width='1' opacity='0.5'%3E%3Cpath d='M40 0l40 40-40 40L0 40z'/%3E%3Cpath d='M40 14l26 26-26 26-26-26z'/%3E%3Ccircle cx='40' cy='40' r='8'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 80px 80px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ *  TV display animations — pure CSS so they run GPU-composited and add
+ *  ~zero JS/main-thread cost on a cheap always-on Android TV stick.
+ * ------------------------------------------------------------------ */
+
+/* News-style announcement ticker: seamless right-to-left scroll.
+   Uses the --scroll-px CSS variable set by JS so copy count adapts to text
+   length — short text gets more copies, long text fewer, always a perfect loop. */
+@keyframes mos-ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(var(--scroll-px, -500px)); }
+}
+
+/* Khutbah waveform bar — replaces 40 Framer-Motion springs with one keyframe. */
+@keyframes mos-wave {
+  0%, 100% { transform: scaleY(0.18); }
+  50% { transform: scaleY(1); }
+}
+.mos-wave-bar {
+  transform-origin: bottom;
+  will-change: transform;
+  animation: mos-wave ease-in-out infinite;
+}
+
+/* Soft pulsing glow used behind the khutbah takeover headline. The element is
+   centered with left:50% so we keep the -50% X shift inside the keyframe. */
+@keyframes mos-glow {
+  0%, 100% { opacity: 0.25; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.5; transform: translateX(-50%) scale(1.1); }
+}
+.mos-glow {
+  will-change: opacity, transform;
+  animation: mos-glow 5s ease-in-out infinite;
+}
+
+/* Ambient aurora drift for the TV background — large, blurred, slow, GPU-only. */
+@keyframes mos-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 4%) scale(1.12); }
+}
+@keyframes mos-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1.05); }
+  50% { transform: translate(-7%, -3%) scale(1); }
+}
+.mos-aurora-a { will-change: transform; animation: mos-drift-a 18s ease-in-out infinite; }
+.mos-aurora-b { will-change: transform; animation: mos-drift-b 22s ease-in-out infinite; }
+
+/* Slow rotation for a faint conic halo behind the hero clock. */
+@keyframes mos-spin { to { transform: rotate(360deg); } }
+.mos-spin-slow { will-change: transform; animation: mos-spin 60s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mos-marquee-track, .mos-wave-bar, .mos-glow,
+  .mos-aurora-a, .mos-aurora-b, .mos-spin-slow { animation: none; }
+}
+
+/* Custom slim scrollbar that matches the midnight theme. */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #05070f;
+}
+::-webkit-scrollbar-thumb {
+  background: #1f2857;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4a73c;
+}
